@@ -30,36 +30,33 @@ void UART2_IRQHandler(void) {
 /* Thread to control robot movement */
 void motorControl (void *argument) {
 	dataPkt rxData;
-	osStatus_t status;
 	for (;;) {
-		status = osMessageQueueGet(motorCtlMsg, &rxData, NULL, osWaitForever);
-		if (status == osOK) {
-			switch (rxData.cmd) {
-			case 0x00:
-				stop();
-				break;
-			case 0x01:
-				forward();
-				break;
-			case 0x02:
-				reverse();
-				break;	
-			case 0x08:
-				turnLeft();
-				break;
-			case 0x09:
-				swerveLeft();
-				break;
-			case 0x05:
-				swerveRight();
-				break;
-			case 0x04:
-				turnRight();
-				break;
-			default:
-				stop();
-				break;
-			}
+		osMessageQueueGet(motorCtlMsg, &rxData, NULL, osWaitForever);
+		switch (rxData.cmd) {
+		case 0x00:
+			stop();
+			break;
+		case 0x01:
+			forward();
+			break;
+		case 0x02:
+			reverse();
+			break;	
+		case 0x08:
+			turnLeft();
+			break;
+		case 0x09:
+			swerveLeft();
+			break;
+		case 0x05:
+			swerveRight();
+			break;
+		case 0x04:
+			turnRight();
+			break;
+		default:
+			stop();
+			break;
 		}
 	}
 }
@@ -151,20 +148,17 @@ void buzzer (void *arguement) {
 /* Thread to handle commands received by UART2 Interrupt */
 void mainRobotBrainControl (void *argument) {
 	dataPkt myData;
-	osStatus_t status;
 	for (;;) {
 		osMessageQueueGet(robotCtlMsg, &myData, NULL, osWaitForever);
-		if (status == osOK) {
-			if (myData.cmd == 0x00) {
-				isMoving = 0;
-			} else {
-				isMoving = 1;
-			}
-			if (myData.cmd == 0x11) {
-				isComplete = 1;
-			}
-			osMessageQueuePut(motorCtlMsg, &myData, NULL, 0);
+		if (myData.cmd == 0x00) {
+			isMoving = 0;
+		} else {
+			isMoving = 1;
 		}
+		if (myData.cmd == 0x11) {
+			isComplete = 1;
+		}
+		osMessageQueuePut(motorCtlMsg, &myData, NULL, 0);
 	}
 }
 
